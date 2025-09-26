@@ -1,0 +1,22 @@
+{
+    "pose_model": "mediapipe",
+    "model_complexity": 1,
+    "min_detection_confidence": 0.7,
+    "min_tracking_confidence": 0.5,
+    "sequence_length": 60,
+    "overlap": 0.5,
+    "sampling_rate": 30,
+    "num_classes": 4,
+    "num_filters": 64,
+    "kernel_size": 3,
+    "num_blocks": 4,
+    "dropout_rate": 0.2,
+    "learning_rate": 0.001,
+    "batch_size": 32,
+    "epochs": 100,
+    "validation_split": 0.2,
+    "output_dir": "outputs",
+    "save_pose_data": true,
+    "save_visualizations": true,
+    "save_metrics": true
+}

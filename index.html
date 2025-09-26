@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gait Analysis Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+        
+        .upload-section {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .upload-section:hover {
+            border-color: #764ba2;
+            background-color: #f8f9ff;
+        }
+        
+        .upload-section.dragover {
+            border-color: #764ba2;
+            background-color: #f0f2ff;
+        }
+        
+        .upload-icon {
+            font-size: 4em;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .upload-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .upload-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .file-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9ff;
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .progress-section {
+            margin-top: 30px;
+            display: none;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+        
+        .progress-text {
+            text-align: center;
+            color: #666;
+            font-size: 1.1em;
+        }
+        
+        .results-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9ff;
+            border-radius: 15px;
+            display: none;
+        }
+        
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .results-title {
+            color: #333;
+            font-size: 1.8em;
+        }
+        
+        .download-btn {
+            background: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .metric-name {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .metric-value {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+        
+        .status-excellent { background: #d4edda; color: #155724; }
+        .status-good { background: #fff3cd; color: #856404; }
+        .status-warning { background: #f8d7da; color: #721c24; }
+        
+        .json-output {
+            margin-top: 20px;
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .error-section {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8d7da;
+            color: #721c24;
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .supported-formats {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .upload-section {
+                padding: 20px;
+            }
+            
+            .metric {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚶 Gait Analysis Platform</h1>
+            <p>Upload your walking video and get instant gait analysis with detailed metrics</p>
+        </div>
+        
+        <div class="upload-section" id="uploadSection">
+            <div class="upload-icon">📹</div>
+            <h3>Drop your video here or click to browse</h3>
+            <p>Analyze your walking pattern in seconds</p>
+            <input type="file" id="fileInput" class="file-input" accept=".mp4,.avi,.mov,.mkv,.wmv,.m4v">
+            <button class="upload-btn" onclick="document.getElementById('fileInput').click()">Choose Video File</button>
+            
+            <div class="file-info" id="fileInfo">
+                <p><strong>Selected:</strong> <span id="fileName"></span></p>
+                <p><strong>Size:</strong> <span id="fileSize"></span></p>
+                <button class="upload-btn" onclick="uploadFile()" id="analyzeBtn">🔍 Analyze Gait</button>
+            </div>
+        </div>
+        
+        <div class="progress-section" id="progressSection">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText">Uploading and analyzing...</div>
+        </div>
+        
+        <div class="results-section" id="resultsSection">
+            <div class="results-header">
+                <h2 class="results-title">📊 Gait Analysis Results</h2>
+                <button class="download-btn" id="downloadBtn" onclick="downloadJSON()">📥 Download JSON</button>
+            </div>
+            <div id="metricsDisplay"></div>
+            <div class="json-output" id="jsonOutput"></div>
+        </div>
+        
+        <div class="error-section" id="errorSection">
+            <h3>❌ Analysis Failed</h3>
+            <p id="errorMessage"></p>
+        </div>
+        
+        <div class="supported-formats">
+            <p>📁 Supported formats: MP4, AVI, MOV, MKV, WMV, M4V (Max: 100MB)</p>
+        </div>
+    </div>
+
+    <script>
+        let analysisResults = null;
+        
+        // File input handling
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                const file = e.target.files[0];
+                showFileInfo(file);
+            }
+        });
+        
+        // Drag and drop handling
+        const uploadSection = document.getElementById('uploadSection');
+        
+        uploadSection.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            uploadSection.classList.add('dragover');
+        });
+        
+        uploadSection.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            uploadSection.classList.remove('dragover');
+        });
+        
+        uploadSection.addEventListener('drop', function(e) {
+            e.preventDefault();
+            uploadSection.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                document.getElementById('fileInput').files = files;
+                showFileInfo(files[0]);
+            }
+        });
+        
+        function showFileInfo(file) {
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileSize').textContent = formatFileSize(file.size);
+            document.getElementById('fileInfo').style.display = 'block';
+        }
+        
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        async function uploadFile() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('Please select a video file first');
+                return;
+            }
+            
+            // Show progress
+            showProgress();
+            
+            const formData = new FormData();
+            formData.append('video', file);
+            
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                hideProgress();
+                
+                if (result.success) {
+                    showResults(result);
+                } else {
+                    showError(result.error);
+                }
+                
+            } catch (error) {
+                hideProgress();
+                showError('Network error: ' + error.message);
+            }
+        }
+        
+        function showProgress() {
+            document.getElementById('progressSection').style.display = 'block';
+            document.getElementById('resultsSection').style.display = 'none';
+            document.getElementById('errorSection').style.display = 'none';
+            
+            // Animate progress
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 20;
+                if (progress > 90) progress = 90;
+                document.getElementById('progressFill').style.width = progress + '%';
+            }, 500);
+            
+            // Store interval to clear later
+            window.progressInterval = interval;
+        }
+        
+        function hideProgress() {
+            clearInterval(window.progressInterval);
+            document.getElementById('progressSection').style.display = 'none';
+            document.getElementById('progressFill').style.width = '100%';
+        }
+        
+        function showResults(data) {
+            analysisResults = data;
+            const results = data.results;
+            
+            // Show results section
+            document.getElementById('resultsSection').style.display = 'block';
+            
+            // Display metrics
+            const metricsHTML = `
+                <div class="metric">
+                    <span class="metric-name">⏱️ Duration</span>
+                    <span class="metric-value">${results.duration_seconds} seconds</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-name">🚶 Cadence</span>
+                    <span class="metric-value">${results.cadence_steps_per_min} steps/min</span>
+                    <span class="status-badge ${getCadenceStatus(results.cadence_steps_per_min)}">${getCadenceLabel(results.cadence_steps_per_min)}</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-name">📏 Step Width</span>
+                    <span class="metric-value">${results.step_width_cm} cm</span>
+                    <span class="status-badge ${getStepWidthStatus(results.step_width_cm)}">${getStepWidthLabel(results.step_width_cm)}</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-name">📐 Stride Length</span>
+                    <span class="metric-value">${results.stride_length_cm} cm</span>
+                    <span class="status-badge ${getStrideStatus(results.stride_length_cm)}">${getStrideLabel(results.stride_length_cm)}</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-name">🦵 Knee Asymmetry</span>
+                    <span class="metric-value">${results.knee_angle_asymmetry_degrees}°</span>
+                    <span class="status-badge ${getAsymmetryStatus(results.knee_angle_asymmetry_degrees, 5)}">${getAsymmetryLabel(results.knee_angle_asymmetry_degrees, 5)}</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-name">🦴 Hip Asymmetry</span>
+                    <span class="metric-value">${results.hip_angle_asymmetry_degrees}°</span>
+                    <span class="status-badge ${getAsymmetryStatus(results.hip_angle_asymmetry_degrees, 3)}">${getAsymmetryLabel(results.hip_angle_asymmetry_degrees, 3)}</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-name">⚖️ Balance Score</span>
+                    <span class="metric-value">${results.balance_score}/100</span>
+                    <span class="status-badge ${getBalanceStatus(results.balance_score)}">${getBalanceLabel(results.balance_score)}</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-name">⏰ Step Time Variability</span>
+                    <span class="metric-value">${results.step_time_variability_seconds}s</span>
+                    <span class="status-badge ${getVariabilityStatus(results.step_time_variability_seconds)}">${getVariabilityLabel(results.step_time_variability_seconds)}</span>
+                </div>
+            `;
+            
+            document.getElementById('metricsDisplay').innerHTML = metricsHTML;
+            
+            // Display JSON
+            document.getElementById('jsonOutput').textContent = JSON.stringify(results, null, 2);
+        }
+        
+        function showError(message) {
+            document.getElementById('errorSection').style.display = 'block';
+            document.getElementById('errorMessage').textContent = message;
+        }
+        
+        function downloadJSON() {
+            if (!analysisResults) return;
+            
+            const dataStr = JSON.stringify(analysisResults.results, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `gait_analysis_${new Date().getTime()}.json`;
+            link.click();
+        }
+        
+        // Status helper functions
+        function getCadenceStatus(value) {
+            if (value >= 90 && value <= 130) return 'status-excellent';
+            if (value >= 80 && value <= 140) return 'status-good';
+            return 'status-warning';
+        }
+        
+        function getCadenceLabel(value) {
+            if (value >= 90 && value <= 130) return 'NORMAL';
+            if (value >= 80 && value <= 140) return 'ACCEPTABLE';
+            return 'CHECK';
+        }
+        
+        function getStepWidthStatus(value) {
+            if (value >= 6 && value <= 12) return 'status-excellent';
+            if (value >= 4 && value <= 15) return 'status-good';
+            return 'status-warning';
+        }
+        
+        function getStepWidthLabel(value) {
+            if (value >= 6 && value <= 12) return 'NORMAL';
+            if (value >= 4 && value <= 15) return 'ACCEPTABLE';
+            return 'CHECK';
+        }
+        
+        function getStrideStatus(value) {
+            if (value >= 45 && value <= 75) return 'status-excellent';
+            if (value >= 35 && value <= 85) return 'status-good';
+            return 'status-warning';
+        }
+        
+        function getStrideLabel(value) {
+            if (value >= 45 && value <= 75) return 'NORMAL';
+            if (value >= 35 && value <= 85) return 'ACCEPTABLE';
+            return 'CHECK';
+        }
+        
+        function getAsymmetryStatus(value, threshold) {
+            if (value < threshold) return 'status-excellent';
+            if (value < threshold * 1.5) return 'status-good';
+            return 'status-warning';
+        }
+        
+        function getAsymmetryLabel(value, threshold) {
+            if (value < threshold) return 'EXCELLENT';
+            if (value < threshold * 1.5) return 'GOOD';
+            return 'CHECK';
+        }
+        
+        function getBalanceStatus(value) {
+            if (value >= 80) return 'status-excellent';
+            if (value >= 60) return 'status-good';
+            return 'status-warning';
+        }
+        
+        function getBalanceLabel(value) {
+            if (value >= 80) return 'EXCELLENT';
+            if (value >= 60) return 'GOOD';
+            return 'NEEDS IMPROVEMENT';
+        }
+        
+        function getVariabilityStatus(value) {
+            if (value <= 0.05) return 'status-excellent';
+            if (value <= 0.08) return 'status-good';
+            return 'status-warning';
+        }
+        
+        function getVariabilityLabel(value) {
+            if (value <= 0.05) return 'EXCELLENT';
+            if (value <= 0.08) return 'GOOD';
+            return 'HIGH';
+        }
+    </script>
+</body>
+</html>
